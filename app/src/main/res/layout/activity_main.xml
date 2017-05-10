@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.andrey.stepcounter.MainActivity"
+    android:orientation="vertical">
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4"
+        android:padding="4sp">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="60sp"
+            android:layout_height="wrap_content"
+            android:text="Steps:" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:text="Total steps:" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="80sp"
+            android:layout_height="wrap_content"
+            android:text="Speed:" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="80sp"
+            android:layout_height="wrap_content"
+            android:text="Distance" />
+
+        <TextView
+            android:id="@+id/stepsCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/totalSteps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/speedTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/distanceCountTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0" />
+    </GridLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/sensorsView"/>
+
+</LinearLayout>
