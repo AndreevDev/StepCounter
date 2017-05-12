@@ -32,7 +32,6 @@ import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.fitness.result.DataSourcesResult;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
