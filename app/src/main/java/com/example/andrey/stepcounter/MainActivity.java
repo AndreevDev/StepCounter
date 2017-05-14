@@ -1,6 +1,7 @@
 package com.example.andrey.stepcounter;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buildGoogleFitClient() {
-        mClient = new GoogleApiClient.Builder(this).addApi(Fitness.SENSORS_API)
+        mClient = new GoogleApiClient.Builder(this)
+                .addApi(Fitness.SENSORS_API)
                 .addApi(Fitness.RECORDING_API)
                 .addApi(Fitness.HISTORY_API)
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
@@ -117,6 +119,25 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         // [END subscribe_to_datatype]
+
+        /*Fitness.RecordingApi.subscribe(mClient, DataType.TYPE_DISTANCE_CUMULATIVE)
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        if (status.isSuccess()) {
+                            if (status.getStatusCode()
+                                    == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
+                                Log.i(TAG, "Existing subscription for activity detected.");
+                            } else {
+                                Log.i(TAG, "Successfully subscribed!");
+                            }
+
+                            new VerifyDataTask().execute();
+                        } else {
+                            Log.i(TAG, "There was a problem subscribing.");
+                        }
+                    }
+                });*/
     }
 
     private class VerifyDataTask extends AsyncTask<Void, Void, Void> {
@@ -151,9 +172,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void getDeviceSensors() {
         Fitness.SensorsApi.findDataSources(mClient, new DataSourcesRequest.Builder()
-                .setDataTypes(DataType.TYPE_STEP_COUNT_DELTA/*,
-                        DataType.AGGREGATE_DISTANCE_DELTA,
-                        DataType.TYPE_SPEED*/)
+                .setDataTypes(DataType.TYPE_STEP_COUNT_DELTA,
+                        DataType.TYPE_DISTANCE_DELTA,
+                        DataType.TYPE_SPEED)
                 .setDataSourceTypes(DataSource.TYPE_RAW, DataSource.TYPE_DERIVED).build())
                 .setResultCallback(new ResultCallback<DataSourcesResult>() {
                     @Override
@@ -167,60 +188,67 @@ public class MainActivity extends AppCompatActivity {
                                     .split("2" + Pattern.quote("}:"))[1].split(":")[0],
                                     dataSource.getDataType().getName()));
 
-                            if (dataSource.getDataType().equals(DataType.TYPE_STEP_COUNT_DELTA)/* ||
+                            if (dataSource.getDataType().equals(DataType.TYPE_STEP_COUNT_DELTA) ||
                                     dataSource.getDataType().equals(DataType.TYPE_DISTANCE_DELTA) ||
-                                    dataSource.getDataType().equals(DataType.TYPE_SPEED)*/) {
-                                Log.i(TAG, "Data source for TYPE_STEP_COUNT_DELTA found!  Registering.");
-                                Fitness.SensorsApi.add(mClient,
-                                        new SensorRequest.Builder()
-                                                .setDataSource(dataSource) // Optional but recommended for custom data sets.
-                                                .setDataType(dataSource.getDataType()) // Can't be omitted.
-                                                .setSamplingRate(1, TimeUnit.SECONDS)
-                                                .build(),
-                                        new OnDataPointListener() {
-                                            @Override
-                                            public void onDataPoint(DataPoint dataPoint) {
-                                                for (final Field field : dataPoint.getDataType().getFields()) {
-                                                    final Value val = dataPoint.getValue(field);
-                                                    Log.i(TAG, field.getName() + ":" + dataPoint.getValue(field));
-
-                                                    runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            if (field.toString().equals("steps(i)")) {
-                                                                final int sc = Integer.parseInt(steps.getText().toString());
-                                                                steps.setText(String.valueOf(sc + val.asInt()));
-                                                                totalSteps.setText(String.valueOf(
-                                                                        Integer.parseInt(
-                                                                                totalSteps.getText().toString())
-                                                                                + val.asInt()));
-                                                            } /*else if (field.toString().equals("distance(f)")) {
-                                                                final int sc = Integer.parseInt(distance.getText().toString());
-                                                                distance.setText(String.valueOf(sc + val.asInt()));
-                                                            } else if (field.toString().equals("speed(f)")) {
-                                                                final int sc = Integer.parseInt(speed.getText().toString());
-                                                                speed.setText(String.valueOf(sc + val.asInt()));
-                                                            }*/
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        })
-                                        .setResultCallback(new ResultCallback<Status>() {
-                                            @Override
-                                            public void onResult(Status status) {
-                                                if (status.isSuccess()) {
-                                                    Log.i(TAG, "Listener for " + dataSource.getDataType().getName() + " registered!");
-                                                } else {
-                                                    Log.i(TAG, "Listener not registered.");
-                                                }
-                                            }
-                                        });
-
+                                    dataSource.getDataType().equals(DataType.TYPE_SPEED)) {
+                                Log.i(TAG, "Data source for " + dataSource.getDataType().toString() + " found!  Registering.");
+                                registerOnDataPointListener(dataSource, dataSource.getDataType());
                             }
 
                             RVAdapter adapter = new RVAdapter(deviceSensors);
                             sensorsView.setAdapter(adapter);
+                        }
+                    }
+                });
+
+    }
+
+    public void registerOnDataPointListener(final DataSource dataSource, DataType dataType) {
+
+        OnDataPointListener listener = new OnDataPointListener() {
+            @Override
+            public void onDataPoint(DataPoint dataPoint) {
+                for (final Field field : dataPoint.getDataType().getFields()) {
+                    final Value val = dataPoint.getValue(field);
+                    Log.i(TAG, field.getName() + ":" + dataPoint.getValue(field));
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (field.toString().equals("steps(i)")) {
+                                final int sc = Integer.parseInt(steps.getText().toString());
+                                steps.setText(String.valueOf(sc + val.asInt()));
+                                totalSteps.setText(String.valueOf(
+                                        Integer.parseInt(
+                                                totalSteps.getText().toString())
+                                                + val.asInt()));
+                            } else if (field.toString().equals("distance(f)")) {
+                                final float sc = Float.parseFloat(distance.getText().toString());
+                                distance.setText(String.valueOf(sc + val.asFloat()));
+                            } else if (field.toString().equals("speed(f)")) {
+                                final float sc = Float.parseFloat(speed.getText().toString());
+                                speed.setText(String.valueOf(sc + val.asFloat()));
+                            }
+                        }
+                    });
+                }
+            }
+        };
+
+        Fitness.SensorsApi.add(mClient,
+                new SensorRequest.Builder()
+                        .setDataSource(dataSource) // Optional but recommended for custom data sets.
+                        .setDataType(dataSource.getDataType()) // Can't be omitted.
+                        .setSamplingRate(3, TimeUnit.SECONDS)
+                        .build(),
+                listener)
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        if (status.isSuccess()) {
+                            Log.i(TAG, "Listener for " + dataSource.getDataType().getName() + " registered!");
+                        } else {
+                            Log.i(TAG, "Listener not registered.");
                         }
                     }
                 });
