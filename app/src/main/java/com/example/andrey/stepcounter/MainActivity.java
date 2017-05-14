@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         Fitness.SensorsApi.add(mClient,
                 new SensorRequest.Builder()
                         .setDataSource(dataSource) // Optional but recommended for custom data sets.
-                        .setDataType(dataSource.getDataType()) // Can't be omitted.
+                        .setDataType(dataType) // Can't be omitted.
                         .setSamplingRate(3, TimeUnit.SECONDS)
                         .build(),
                 listener)
