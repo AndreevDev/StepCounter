@@ -120,24 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 });
         // [END subscribe_to_datatype]
 
-        /*Fitness.RecordingApi.subscribe(mClient, DataType.TYPE_DISTANCE_CUMULATIVE)
-                .setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        if (status.isSuccess()) {
-                            if (status.getStatusCode()
-                                    == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
-                                Log.i(TAG, "Existing subscription for activity detected.");
-                            } else {
-                                Log.i(TAG, "Successfully subscribed!");
-                            }
-
-                            new VerifyDataTask().execute();
-                        } else {
-                            Log.i(TAG, "There was a problem subscribing.");
-                        }
-                    }
-                });*/
     }
 
     private class VerifyDataTask extends AsyncTask<Void, Void, Void> {
